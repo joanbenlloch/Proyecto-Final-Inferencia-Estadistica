@@ -1,0 +1,424 @@
+---
+title: "Codigo R para el trabajo final de Inferencia Estadística"
+author: "Joan Benlloch"
+date: "2024-05-21"
+output: word_document
+---
+```{r}
+#Primera Parte
+#Intervalos de confianza. Cabe decir que ningún de las variables del dataset sigue una distribución normal
+
+```
+```{r}
+#carga de librerías
+library(epitools)
+```
+```{r}
+#establecemos el directorio de trabajo
+setwd("C:/Users/joanb/Documents/Uni/U-TAD/Tercero/2n Cuatri/Inferéncia Estadística/Trabajo Final")
+```
+```{r}
+#cargo el dataset
+titanic_df <- read.csv("titanic/titanic3.csv")
+```
+```{r}
+#Intervalo de confianza del 95% para la media de la edad de los pasajeros del titanic
+n <- nrow(titanic_df)
+alpha <- 1-0.95
+media_edad <- mean(titanic_df$age,na.rm=TRUE)
+media_edad
+std_edad <- sd(titanic_df$age,na.rm=TRUE)
+std_edad
+#Se trata de un IC para una media con sigma desconocida (tamaño muestral grande)
+#Calculamos por separado el error máximo de estimación
+Z<-qnorm(1-alpha/2)
+Z
+error_std <- std_edad/sqrt(n)
+error_std
+
+margen_error <- Z*error_std
+margen_error
+```	
+```{r}
+#Calculamos el intervalo de confianza para la media en las distintas clases
+#Primera
+media_edad_primera <- mean(titanic_df[titanic_df$pclass==1,]$age,na.rm=TRUE)
+std_edad_primera <- sd(titanic_df[titanic_df$pclass==1,]$age,na.rm=TRUE)
+n_primera <- nrow(titanic_df[titanic_df$pclass==1,])
+error_std_primera <- std_edad_primera/sqrt(n_primera)
+margen_error_primera <- Z*error_std_primera
+IC_primera <- c(media_edad_primera-margen_error_primera,media_edad_primera+margen_error_primera)
+IC_primera
+#Segunda
+media_edad_segunda <- mean(titanic_df[titanic_df$pclass==2,]$age,na.rm=TRUE)
+std_edad_segunda <- sd(titanic_df[titanic_df$pclass==2,]$age,na.rm=TRUE)
+n_segunda <- nrow(titanic_df[titanic_df$pclass==2,])
+error_std_segunda <- std_edad_segunda/sqrt(n_segunda)
+margen_error_segunda <- Z*error_std_segunda
+IC_segunda <- c(media_edad_segunda-margen_error_segunda,media_edad_segunda+margen_error_segunda)
+IC_segunda
+#Tercera
+media_edad_tercera <- mean(titanic_df[titanic_df$pclass==3,]$age,na.rm=TRUE)
+std_edad_tercera <- sd(titanic_df[titanic_df$pclass==3,]$age,na.rm=TRUE)
+n_tercera <- nrow(titanic_df[titanic_df$pclass==3,])
+error_std_tercera <- std_edad_tercera/sqrt(n_tercera)
+margen_error_tercera <- Z*error_std_tercera
+IC_tercera <- c(media_edad_tercera-margen_error_tercera,media_edad_tercera+margen_error_tercera)
+IC_tercera
+```
+
+#
+```{r}
+#Calculamos el intervalo de confianza
+IC <- c(media_edad-margen_error,media_edad+margen_error)
+IC
+```
+```{r}
+#elimino los NA de la variable survived, quitando el último valor de la columna que es NA
+titanic_df$survived <- as.character(titanic_df$survived)
+titanic_df$survived[titanic_df$survived==""] <- NA
+titanic_df$survived <- as.numeric(titanic_df$survived)
+titanic_df <- titanic_df[1:(nrow(titanic_df)-1),]
+titanic_df$survived
+```
+```{r}
+#Primero elimino las filas con  NA de la variable edad
+titanic_df$age <- as.numeric(titanic_df$age)
+titanic_df$age[titanic_df$age==""] <- NA
+titanic_df$age <- as.numeric(titanic_df$age)
+titanic_df <- titanic_df[!is.na(titanic_df$age),]
+nrow(titanic_df)
+titanic_df$age
+```
+```{r}
+#voy a hacer un intervalo de confianza del 90% para saber que proporción de pasajeros era menor de edad, edad <18 años
+#Primero calculo la proporción de pasajeros que eran menores de edad
+p <- sum(titanic_df$age<18)/n
+p
+#Se trata de un IC para una proporción
+alpha <- 1-0.99
+#Calculamos por separado el error máximo de estimación
+Z<-qnorm(1-alpha/2)
+Z
+error_prop <- sqrt(p*(1-p)/n)
+error_prop
+
+margen_error <- Z*error_prop
+margen_error
+```
+```{r}
+#Calculamos el intervalo de confianza
+IC <- c(p-margen_error,p+margen_error)
+IC
+```
+
+```{r}	
+#Intervalo de confianza del 95% para la proporción de pasajeros que sobrevivieron
+alpha <- 1-0.99
+n <- nrow(titanic_df)
+p <- sum(titanic_df$survived)/n
+p
+#Se trata de un IC para una proporción
+#Calculamos por separado el error máximo de estimación
+Z<-qnorm(1-alpha/2)
+Z
+error_prop <- sqrt(p*(1-p)/n)
+error_prop
+
+margen_error <- Z*error_prop
+margen_error
+```
+```{r}
+#Calculamos el intervalo de confianza
+IC <- c(p-margen_error,p+margen_error)
+IC
+#El valor observado de la proporción de pasajeros que sobrevivieron es 0.3819
+#El intervalo de confianza del 95% para la proporción de pasajeros que sobrevivieron es (0.3556502, 0.4082917)
+```
+```{r}
+##Intervalo de Confianza para una proporción###
+#Vamos a obtener un intervalo de confianza para la proporción de pasajeros en primera clase dada una muestra de 100 pasajeros
+#primero eliminamos los NA de la variable pclass
+titanic_df$pclass <- as.character(titanic_df$pclass)
+titanic_df$pclass[titanic_df$pclass==""] <- NA
+titanic_df$pclass <- as.numeric(titanic_df$pclass)
+
+titanic_df$pclass
+```	
+```{r}
+#Intervalo de confianza del 95% para la proporción de pasajeros en primera clase dada una muestra de 100 pasajeros
+alpha <- 1-0.95
+n <- nrow(titanic_df)
+p <- sum(titanic_df$pclass==1)/n
+p
+#p es la proporción real de pasajeros en primera clase
+set.seed(123)
+pasajeros.elegidos <- sample(1:n,100)
+```
+```{r}
+#Veamos cuales son los pasajeros elegidos en la muestra
+muestra.pasajeros = titanic_df[pasajeros.elegidos,]
+head(muestra.pasajeros)
+```
+```{r}
+#Calculamos la proporción de pasajeros en primera clase en la muestra
+número.pasajeros.primera = table(muestra.pasajeros$pclass)[1]
+número.pasajeros.primera
+```	
+```{r}
+#Y vamos ya a calcular el intervalo de confianza exacto con "epitools"
+binom.exact(número.pasajeros.primera,100,conf.level=0.95)
+```
+```{r}
+###Intervalo de Confianza por el método de Wilson###
+binom.wilson(número.pasajeros.primera,100,conf.level=0.95)
+```
+```{r}
+#Comprobamos cómo quedaría el IC utilizando el método de Laplace
+binom.approx(número.pasajeros.primera,100,conf.level=0.95)
+```
+```{r}
+### Ejemplo de contrastes de hipótesis###
+#Dado qeu la mayoría de contrastes de hiótesis son en poblaciones normales y en mi dataset np hay ninguna, lo que 
+# voy a aplicar es un test de hipótesis para contrastes de medias. Ya que tengo muestras grandes >40
+# Por ejemplo, voy a contrastar la edad media en muestras de pasajeros en primera y tercera clase
+```
+```{r}
+#Primero elimino las filas con  NA de la variable edad
+titanic_df$age <- as.numeric(titanic_df$age)
+titanic_df$age[titanic_df$age==""] <- NA
+titanic_df$age <- as.numeric(titanic_df$age)
+titanic_df <- titanic_df[!is.na(titanic_df$age),]
+nrow(titanic_df)
+titanic_df$age
+```
+```{r}
+#Contraste de hipótesis para la edad media en muestras de pasajeros en primera y tercera clase
+#Primero obtengo las muestras 
+muestra.primera <- titanic_df[titanic_df$pclass==1,]$age
+muestra.tercera <- titanic_df[titanic_df$pclass==3,]$age
+#Calculo las medias y las desviaciones típicas
+media.primera <- mean(muestra.primera)
+media.tercera <- mean(muestra.tercera)
+std.primera <- sd(muestra.primera)
+std.tercera <- sd(muestra.tercera)
+#Calculo el tamaño de las muestras
+n.primera <- length(muestra.primera)
+n.tercera <- length(muestra.tercera)
+#Calculo el estadístico de contraste
+t <- (media.primera-media.tercera)/sqrt(std.primera^2/n.primera+std.tercera^2/n.tercera)
+t
+#Por el teorema Central del Limite podemos decir que sigue una distribución normal
+p.valor <- 2*pt(-abs(t),df=n.primera+n.tercera-2)
+p.valor
+#Dado que la media de edades es mucho mayor en primera clase, el p-valor es muy pequeño, por tanto rechazamos la hipótesis nula
+```
+```{r}
+#Aceptaríamos que la diferncia de edades medias es 10 años mayor en primera clase?
+#Ahora H0: mu_1-mu_2 = 10,    HA: mu_1-mu_2 != 10
+t_0 <- 10
+t <- (media.primera-media.tercera-t_0)/sqrt(std.primera^2/n.primera+std.tercera^2/n.tercera)
+t
+p.valor <- 2*pt(-abs(t),df=n.primera+n.tercera-2)
+p.valor
+```
+```{r}	
+#Dado que el p-valor es muy pequeño, rechazamos la hipótesis nula, la diferencia de edades medias no es 10 años mayor en primera clase
+#Veamos si podemos aceptar que sean 15 años mayores en media la pblación de primera clase respecto a tercera clase
+t_0 <- 15
+t <- (media.primera-media.tercera-t_0)/sqrt(std.primera^2/n.primera+std.tercera^2/n.tercera)
+t
+p.valor <- 2*pt(-abs(t),df=n.primera+n.tercera-2)
+p.valor
+#p-valor = 0.5236358 => aceptamos la hipótesis nula, la diferencia de edades medias es 15 años mayor en primera clase
+```
+```{r}
+#Contraste de hipótesis para la proporción de pasajeros que sobrevivieron en primera y tercera clase
+#Primero obtengo las muestras
+muestra.primera <- titanic_df[titanic_df$pclass==1,]$survived
+muestra.tercera <- titanic_df[titanic_df$pclass==3,]$survived
+muestra.segunda <- titanic_df[titanic_df$pclass==2,]$survived
+#Calculo las proporciones
+p.primera <- sum(muestra.primera)/length(muestra.primera)
+p.tercera <- sum(muestra.tercera)/length(muestra.tercera)
+#Calculo el tamaño de las muestras
+n.primera <- length(muestra.primera)
+n.tercera <- length(muestra.tercera)
+#Calculo el estadístico de contraste
+z <- (p.primera-p.tercera)/sqrt(p.primera*(1-p.primera)/n.primera+p.tercera*(1-p.tercera)/n.tercera)
+z
+#Por el teorema Central del Limite podemos decir que sigue una distribución normal
+p.valor <- 2*pnorm(-abs(z))
+p.valor
+#Dado que la proporción de pasajeros que sobrevivieron es mucho mayor en primera clase, el p-valor es muy pequeño, por tanto rechazamos la hipótesis nula
+#Es decir, la proporción de pasajeros que sobrevivieron en primera clase es significativamente mayor que en tercera clase
+```	
+```{r}
+#Contraste de hipótesis para la proporción de pasajeros que sobrevivieron en primera y segunda clase
+#Primero obtengo las muestras
+muestra.primera <- titanic_df[titanic_df$pclass==1,]$survived
+muestra.segunda <- titanic_df[titanic_df$pclass==2,]$survived
+#Calculo las proporciones
+p.primera <- sum(muestra.primera)/length(muestra.primera)
+p.segunda <- sum(muestra.segunda)/length(muestra.segunda)
+#Calculo el tamaño de las muestras
+n.primera <- length(muestra.primera)
+n.segunda <- length(muestra.segunda)
+#Calculo el estadístico de contraste
+z <- (p.primera-p.segunda)/sqrt(p.primera*(1-p.primera)/n.primera+p.segunda*(1-p.segunda)/n.segunda)
+z
+#Por el teorema Central del Limite podemos decir que sigue una distribución normal
+p.valor <- 2*pnorm(-abs(z))
+p.valor
+```
+```{r}
+#por último comparo tercera con segunda clase
+#Contraste de hipótesis para la proporción de pasajeros que sobrevivieron en tercera y segunda clase
+#Primero obtengo las muestras
+muestra.tercera <- titanic_df[titanic_df$pclass==3,]$survived
+muestra.segunda <- titanic_df[titanic_df$pclass==2,]$survived
+#Calculo las proporciones
+p.tercera <- sum(muestra.tercera)/length(muestra.tercera)
+p.segunda <- sum(muestra.segunda)/length(muestra.segunda)
+#Calculo el tamaño de las muestras
+n.tercera <- length(muestra.tercera)
+n.segunda <- length(muestra.segunda)
+#Calculo el estadístico de contraste
+z <- (p.tercera-p.segunda)/sqrt(p.tercera*(1-p.tercera)/n.tercera+p.segunda*(1-p.segunda)/n.segunda)
+z
+p.valor <- 2*pnorm(-abs(z))
+p.valor
+```
+```{r}
+#contraste de proporciones para la población de pasajeros qeu sobrevivió. ¿Podemos decir que la rpobabilidad de sobrevivir fuese mayor del 50%?
+#H0: pi = 0,5, HA: pi <0,5
+p_0 <- 0.5
+n = nrow(titanic_df)
+p <- sum(titanic_df$survived)
+p
+p.valor = pbinom(p,n,p_0)
+p.valor
+#p-valor es aproximadamente 0, por tanto rechazamos H0, la probabilidad de sobrevivir era menor del 50%
+```
+```{r}
+#Hacemos el mismo contraste pero para ver si era mayor del 30%
+#H0: pi = 0,3, HA: pi >0,3
+p_0 <- 0.3
+p.valor = 1-pbinom(p,n,p_0)
+p.valor
+#p-valor es aproximadamente 0, por tanto rechazamos H0, la probabilidad de sobrevivir era mayor del 30%
+```	
+```{r}
+#Hago ahora un contraste de proporciones para ver si la probabilidad de sobrevivir era del 40% o no
+#H0: pi = 0,4, HA: pi != 0,4
+p_0 <- 0.4
+p.valor = 2*pbinom(p,n,p_0)
+p.valor
+#El p-valor es mayot que 1 lo que significa que según los datos observados tenemos evidencia fuerte de que la probabilidad de sobrevivir fuese del 40%
+```	
+
+```{r}
+###Ejemplo de contraste chi cuadrado###
+# Voy a hacer un contraste de bondad de ajuste sobre la edad de la muestra de pasajeros del titanic
+#Al estudiar la distribución de la podblación por si sigue una normal no podemos inferir en una población 
+#de todos los cruceros o barcos que hacen viajes, pero tal vez si que se puede hablar de los barcos 
+#de la misma compañía o de los barcos de la misma época o incluso de viajes a América en 1912, 
+#según las características y motivos de los viajeros para viajar en aquella época.
+```
+```{r}
+#Cargo la fila de la edad en un vector
+edad <- titanic_df$age
+#muestro las primeras filas
+head(edad)
+```
+```{r}
+#Obtengo la media de la edad y su desviación típica
+media_edad <- mean(edad,na.rm=TRUE)
+std_edad <- sd(edad,na.rm=TRUE)
+```
+```{r}
+#Defino los intervalos y las frecuencias empíricas ordenando as edades
+edad_ordeando <- sort(edad)
+#creo una tabla de intervalos agrupando las edades de 5 en 5 años incluyendo el 80
+intervalos <- seq(0,70,5) #elijo hasta el 70 para conseguir al menos una frecuecia de 5 en todos los intervalos
+intervalos <- c(intervalos, Inf) #el ultimo intervalo agrupa todas las edades restantes
+# Dividir las edades en los intervalos especificados
+intervalos_edades <- cut(edad_ordeando, breaks = intervalos, right = FALSE)
+
+# Contar la frecuencia de edades en cada intervalo
+tabla_frecuencia <- table(intervalos_edades)
+
+# Mostrar la tabla de frecuencia
+print(tabla_frecuencia)
+```
+```{r}
+extremos.derechos = c(5,10,15,20,25,30,35,40,45,50,55,60,65,70,Inf)
+extremos.izquierdos = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70)
+frecuencias.empíricas = unname(tabla_frecuencia)
+n=sum(frecuencias.empíricas)
+```
+```{r}
+#Obtenemos las frecuencias teóricas con la función pnorm
+mu=media_edad; sigma=std_edad;
+probabilidades.teóricas = pnorm(extremos.derechos,mu,sigma)-
+  pnorm(extremos.izquierdos,mu,sigma)
+
+# Normalizamos las probabilidades teóricas para que sumen 1
+probabilidades.teóricas <- probabilidades.teóricas / sum(probabilidades.teóricas)
+sum(probabilidades.teóricas)
+frecuencias.teóricas = n*probabilidades.teóricas
+round(frecuencias.teóricas,2)
+```
+```{r}
+#Y aplicamos el test chi cuadrado
+chisq.test(frecuencias.empíricas,p=probabilidades.teóricas)
+```
+```{r}
+#Si hacemos la simulación del p-valor
+chisq.test(frecuencias.empíricas,p=probabilidades.teóricas,simulate.p.value = TRUE, B=2000)
+          
+```
+```{r}
+#Obtenemos un p-value < 2.2e-16, lo cual es extremadamente pequeño, por tanto rechazamos la hipótesis nula, 
+#las edades no siguen una distribución normal, podemos estar casi seguros de ello
+```
+```{r}
+######
+#Hago un contraste grafico para ver la forma de la distribución de edades, en python
+
+####
+# Contraste de independencia
+#Planteo si el hecho de ser mujer es independiente de sobrevivir o no a al accidente de ltitánic
+```
+```{r}
+#Primero hallo la tabla de contingencia de las dos variables
+#Preparo los datos para no tener valores "" en la variable del sexo
+titanic_df$sex <- as.character(titanic_df$sex)
+titanic_df$sex[titanic_df$sex==""] <- NA
+titanic_df$sexFactor <- as.factor(titanic_df$sex)
+#Creo la tabla de contingencia
+
+(tabla.contingencia = table(titanic_df$sexFactor,titanic_df$survived))
+```
+```{r}
+#Genero la tabla de frecuencias esperadas
+(tabla.frec.esperadas =rowSums(tabla.contingencia)%*%t(colSums(tabla.contingencia))
+ /sum(tabla.contingencia))
+```
+```{r}
+#Aplico el test de chi cuadrado
+chisq.test(tabla.contingencia)
+```
+```{r}
+#El p-valor es muy pequeño, por tanto rechazamos la hipótesis nula, el hecho de ser mujer no es independiente de sobrevivir o no
+```
+```{r}
+#Hacemos el mismo contraste para la varibale de clase y haber sobrevivido
+(tabla.contingencia = table(titanic_df$pclass,titanic_df$survived))
+(tabla.frec.esperadas =rowSums(tabla.contingencia)%*%t(colSums(tabla.contingencia))
+ /sum(tabla.contingencia))
+chisq.test(tabla.contingencia)
+```
+```{r}
+#El p-valor es muy pequeño, por tanto rechazamos la hipótesis nula, el hecho de la clase en la que viajaba un pasajero no es independiente de sobrevivir o no
+```
